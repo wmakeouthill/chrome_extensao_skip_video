@@ -40,7 +40,20 @@
         "https://www.tumblr.com/*",
         "https://likee.video/*"
       ],
-      "js": ["content.js"],
+      "js": [
+        "js/core.js",
+        "js/detector.js",
+        "js/utils/loop-disabler.js",
+        "js/utils/timeupdate-handler.js",
+        "js/adapters/browser-chrome.js",
+        "js/adapters/browser-firefox.js",
+        "js/handlers/handler-youtube.js",
+        "js/handlers/handler-tiktok.js",
+        "js/handlers/handler-instagram.js",
+        "js/handlers/handler-generic.js",
+        "js/video-observer.js",
+        "content.js"
+      ],
       "run_at": "document_idle"
     }
   ],

@@ -15,6 +15,7 @@ const ARQUIVOS_INCLUIR = [
   'popup.js',
   'content.js',
   'background.js',
+  'js',
   'icons'
 ];
 

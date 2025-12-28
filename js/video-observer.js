@@ -59,17 +59,44 @@ function configurarVideo(video) {
 
 function avancarVideo() {
   const hostname = window.location.hostname;
+  const isFullscreen = !!document.fullscreenElement;
+
+  // Função para simular tecla
+  const pressionarTecla = (key, keyCode) => {
+    const target = document.fullscreenElement || document.activeElement || document.body;
+    ['keydown', 'keypress', 'keyup'].forEach(type => {
+      target.dispatchEvent(new KeyboardEvent(type, {
+        key, code: key, keyCode, which: keyCode, bubbles: true, cancelable: true
+      }));
+    });
+    document.dispatchEvent(new KeyboardEvent('keydown', {
+      key, code: key, keyCode, which: keyCode, bubbles: true, cancelable: true
+    }));
+  };
 
   if (hostname.includes('youtube.com')) {
-    // YouTube: simular tecla ArrowDown
-    document.dispatchEvent(new KeyboardEvent('keydown', {
-      key: 'ArrowDown',
-      code: 'ArrowDown',
-      keyCode: 40,
-      which: 40,
-      bubbles: true
-    }));
-  } else {
+    pressionarTecla('ArrowDown', 40);
+  }
+  else if (hostname.includes('tiktok.com')) {
+    // TikTok: ArrowDown funciona em fullscreen e normal
+    pressionarTecla('ArrowDown', 40);
+    // Fallback: scroll se não estiver em fullscreen
+    if (!isFullscreen) {
+      setTimeout(scrollParaBaixo, 100);
+    }
+  }
+  else if (hostname.includes('instagram.com')) {
+    // Instagram: ArrowDown para Reels
+    pressionarTecla('ArrowDown', 40);
+    if (!isFullscreen) {
+      setTimeout(scrollParaBaixo, 100);
+    }
+  }
+  else if (hostname.includes('kwai.com') || hostname.includes('likee.video')) {
+    pressionarTecla('ArrowDown', 40);
+    setTimeout(scrollParaBaixo, 100);
+  }
+  else {
     // Outras plataformas: scroll down
     scrollParaBaixo();
   }

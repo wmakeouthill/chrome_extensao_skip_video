@@ -21,9 +21,9 @@ const ARQUIVOS_INCLUIR = [
 
 function verificarArquivos() {
   console.log('🔍 Verificando arquivos necessários...\n');
-  
+
   const faltando = [];
-  
+
   ARQUIVOS_INCLUIR.forEach(arquivo => {
     const caminhoCompleto = path.join(__dirname, arquivo);
     if (!fs.existsSync(caminhoCompleto)) {
@@ -52,13 +52,13 @@ function verificarArquivos() {
 
 function criarZip() {
   console.log('📦 Criando arquivo .zip...\n');
-  
+
   const nomeArquivo = 'auto-skip-video.zip';
-  
+
   try {
     // Detectar sistema operacional
     const isWindows = process.platform === 'win32';
-    
+
     if (isWindows) {
       // Windows: usar PowerShell Compress-Archive com recursão correta
       // Incluir arquivos e pastas específicos recursivamente
@@ -75,24 +75,24 @@ function criarZip() {
         'js\\handlers\\*',
         'js\\utils\\*'
       ];
-      
+
       // Remover zip existente
       if (fs.existsSync(nomeArquivo)) {
         fs.unlinkSync(nomeArquivo);
       }
-      
+
       // Criar lista de arquivos para incluir (usando Set para evitar duplicatas)
       const arquivosList = new Set();
-      
+
       // Adicionar manifest.json primeiro
       if (fs.existsSync('manifest.json')) {
         arquivosList.add('manifest.json');
       }
-      
+
       // Adicionar arquivos JS baseado no manifest.json (apenas os que são realmente usados)
       const manifestPath = path.join(__dirname, 'manifest.json');
       const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
-      
+
       // Arquivos JS do content_scripts
       if (manifest.content_scripts && manifest.content_scripts[0] && manifest.content_scripts[0].js) {
         manifest.content_scripts[0].js.forEach(jsFile => {
@@ -104,7 +104,7 @@ function criarZip() {
           }
         });
       }
-      
+
       // Arquivos JS do background
       if (manifest.background && manifest.background.scripts) {
         manifest.background.scripts.forEach(jsFile => {
@@ -116,7 +116,7 @@ function criarZip() {
           }
         });
       }
-      
+
       // Adicionar arquivos HTML/CSS do popup
       if (manifest.action && manifest.action.default_popup) {
         arquivosList.add(manifest.action.default_popup);
@@ -127,26 +127,32 @@ function criarZip() {
           }
         });
       }
-      
-      // Adicionar arquivos de ícones
+
+      // Adicionar arquivos de ícones (normalizar caminhos com forward slashes)
       if (manifest.icons) {
         Object.values(manifest.icons).forEach(iconPath => {
-          if (fs.existsSync(iconPath)) {
+          const normalizedPath = iconPath.replace(/\\/g, '/');
+          if (fs.existsSync(normalizedPath)) {
+            arquivosList.add(normalizedPath);
+          } else if (fs.existsSync(iconPath)) {
             arquivosList.add(iconPath);
           }
         });
       }
       if (manifest.action && manifest.action.default_icon) {
         Object.values(manifest.action.default_icon).forEach(iconPath => {
-          if (fs.existsSync(iconPath)) {
+          const normalizedPath = iconPath.replace(/\\/g, '/');
+          if (fs.existsSync(normalizedPath)) {
+            arquivosList.add(normalizedPath);
+          } else if (fs.existsSync(iconPath)) {
             arquivosList.add(iconPath);
           }
         });
       }
-      
+
       // Converter Set para Array
       const arquivosArray = Array.from(arquivosList);
-      
+
       // Criar zip usando PowerShell
       const arquivosQuoted = arquivosArray.map(f => `'${f.replace(/'/g, "''")}'`).join(',');
       const comando = `powershell -Command "$files = @(${arquivosQuoted}); Compress-Archive -Path $files -DestinationPath '${nomeArquivo}' -Force"`;
@@ -157,7 +163,7 @@ function criarZip() {
       const comando = `zip -r ${nomeArquivo} ${arquivosParaZipar} -x "*.md" "*.git*" ".DS_Store" "Thumbs.db" "build.js" "package.json" "node_modules/*"`;
       execSync(comando, { stdio: 'inherit' });
     }
-    
+
     // Verificar se arquivo foi criado
     if (fs.existsSync(nomeArquivo)) {
       const stats = fs.statSync(nomeArquivo);

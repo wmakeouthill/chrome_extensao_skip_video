@@ -27,7 +27,16 @@ function configurarObservadorVideo(endHandler) {
       return;
     }
     
-    if (video === currentVideo) return;
+    if (video === currentVideo) {
+      // Mesmo vídeo, mas garantir que loop ainda está desativado (especialmente YouTube)
+      const plataforma = detectarPlataforma();
+      if (plataforma === 'youtube' && video.loop) {
+        video.loop = false;
+        video.setAttribute('loop', 'false');
+        desativarLoopYouTube();
+      }
+      return;
+    }
 
     removerListenerAnterior();
     currentVideo = video;
@@ -38,9 +47,26 @@ function configurarObservadorVideo(endHandler) {
     const plataforma = detectarPlataforma();
     configurarVideoPorPlataforma(video, plataforma);
     
+    // Para YouTube, também desativar loop imediatamente após adicionar listeners
+    if (plataforma === 'youtube') {
+      // Usar setTimeout para garantir que acontece após configuração
+      setTimeout(() => {
+        desativarLoopYouTube();
+      }, 0);
+    }
+    
     // Adicionar múltiplos listeners para garantir detecção
     video.addEventListener('ended', endHandler);
     video.addEventListener('timeupdate', currentTimeUpdateHandler);
+    
+    // Adicionar listener de 'play' para garantir loop desativado quando vídeo tocar
+    video.addEventListener('play', () => {
+      if (plataforma === 'youtube' && video.loop) {
+        video.loop = false;
+        video.setAttribute('loop', 'false');
+        desativarLoopYouTube();
+      }
+    }, { once: false });
     
     if (DEBUG) {
       console.log('[Auto Skip Video] Vídeo encontrado e monitorado:', {

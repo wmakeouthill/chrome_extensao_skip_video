@@ -1,0 +1,14 @@
+<svg width="128" height="128" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fundo circular -->
+  <circle cx="64" cy="64" r="60" fill="#667eea"/>
+  
+  <!-- Ícone de play/skip -->
+  <g transform="translate(64, 64)">
+    <!-- Triângulo de play -->
+    <path d="M -15 -20 L -15 20 L 15 0 Z" fill="white" opacity="0.9"/>
+    
+    <!-- Seta dupla (skip) -->
+    <path d="M 25 -15 L 25 15 M 25 0 L 40 0" stroke="white" stroke-width="4" stroke-linecap="round" opacity="0.9"/>
+    <path d="M 40 -15 L 40 15" stroke="white" stroke-width="4" stroke-linecap="round" opacity="0.9"/>
+  </g>
+</svg>

@@ -1,0 +1,17 @@
+{
+  "name": "auto-skip-video-extension",
+  "version": "1.0.0",
+  "description": "Chrome extension to automatically skip to next video when current ends",
+  "scripts": {
+    "build": "node build.js",
+    "zip": "node build.js"
+  },
+  "keywords": [
+    "chrome-extension",
+    "video",
+    "auto-skip"
+  ],
+  "author": "",
+  "license": "MIT"
+}
+

@@ -1,0 +1,29 @@
+# Arquivos do sistema
+.DS_Store
+Thumbs.db
+
+# Arquivos de desenvolvimento
+*.log
+*.tmp
+
+# Node modules (se usar ferramentas de build)
+node_modules/
+
+# Arquivos de build
+dist/
+build/
+auto-skip-video.zip
+*.zip
+
+# Arquivos de publicação
+*.crx
+
+#Regras wesley
+
+.cursorrules
+.cursorrules-backend
+.cursorrules-frontend
+
+*.txt
+
+docswesley/

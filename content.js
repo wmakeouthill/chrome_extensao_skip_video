@@ -1,108 +1,54 @@
 /**
- * Content Script - Orquestrador Principal
- * Coordena todos os módulos e gerencia o ciclo de vida
+ * Content Script - ULTRA LEVE
+ * Zero polling, zero MutationObserver
+ * Apenas escuta eventos nativos do DOM
  */
 
 // ==================== INICIALIZAÇÃO ====================
+
 function inicializar() {
   chrome.storage.sync.get([STORAGE_KEY], (result) => {
     autoSkipEnabled = result[STORAGE_KEY] !== false;
-    aguardarDOMPronto();
+    if (autoSkipEnabled) {
+      configurarEventos();
+    }
   });
 }
 
-function aguardarDOMPronto() {
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', inicializarAutoSkip);
-  } else {
-    inicializarAutoSkip();
+// ==================== EVENTOS REATIVOS ====================
+
+function configurarEventos() {
+  // Evento 'play' em qualquer vídeo da página (event delegation)
+  document.addEventListener('play', (e) => {
+    if (e.target.tagName === 'VIDEO' && autoSkipEnabled) {
+      configurarVideo(e.target);
+    }
+  }, true); // capture phase para pegar antes de qualquer coisa
+
+  // Capturar vídeo já existente na página
+  const videoExistente = document.querySelector('video');
+  if (videoExistente) {
+    configurarVideo(videoExistente);
   }
 }
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+// ==================== MENSAGENS DO POPUP ====================
+
+chrome.runtime.onMessage.addListener((message) => {
   if (message.action === 'toggleChanged') {
     autoSkipEnabled = message.enabled;
-    if (autoSkipEnabled) {
-      aguardarDOMPronto();
+    if (!autoSkipEnabled) {
+      limparVideo();
     } else {
-      // Limpar intervalo de URL também
-      if (urlObserverInterval) {
-        clearInterval(urlObserverInterval);
-        urlObserverInterval = null;
-      }
-      limparRecursos();
+      configurarEventos();
     }
   }
 });
 
-// Observar mudanças de URL (SPA navigation) - ULTRA Otimizado
-let urlObserverInterval = null;
-let navigationListener = null;
+// ==================== INICIAR ====================
 
-function configurarObserverURL() {
-  // Limpar recursos anteriores
-  if (urlObserverInterval) {
-    clearInterval(urlObserverInterval);
-    urlObserverInterval = null;
-  }
-  if (navigationListener && window.navigation) {
-    window.navigation.removeEventListener('navigate', navigationListener);
-    navigationListener = null;
-  }
-
-  let ultimaUrl = location.href;
-
-  // Preferir Navigation API (zero polling, event-driven)
-  if (typeof window.navigation !== 'undefined') {
-    navigationListener = (event) => {
-      if (autoSkipEnabled && event.destination.url !== ultimaUrl) {
-        ultimaUrl = event.destination.url;
-        inicializarAutoSkip();
-      }
-    };
-    window.navigation.addEventListener('navigate', navigationListener);
-    if (DEBUG) console.log('[Auto Skip Video] Usando Navigation API (zero polling)');
-  } else {
-    // Fallback: Polling a cada 3 segundos (suficiente para SPAs)
-    urlObserverInterval = setInterval(() => {
-      const url = location.href;
-      if (url !== ultimaUrl) {
-        ultimaUrl = url;
-        if (autoSkipEnabled) {
-          inicializarAutoSkip();
-        }
-      }
-    }, 3000); // 3 segundos - mais leve
-  }
-}
-
-// Inicializar quando o script carregar
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
-    configurarObserverURL();
-    inicializar();
-  });
+  document.addEventListener('DOMContentLoaded', inicializar);
 } else {
-  configurarObserverURL();
   inicializar();
-}
-
-// ==================== INICIALIZAÇÃO PRINCIPAL ====================
-function inicializarAutoSkip() {
-  if (!autoSkipEnabled) {
-    if (DEBUG) console.log('[Auto Skip Video] Extensão desativada, não inicializando');
-    return;
-  }
-
-  try {
-    const plataforma = detectarPlataforma();
-    if (DEBUG) console.log('[Auto Skip Video] Plataforma detectada:', plataforma);
-
-    const endHandler = obterEndHandler(plataforma);
-    inicializarObservadorVideo(endHandler);
-
-    if (DEBUG) console.log('[Auto Skip Video] Inicialização concluída');
-  } catch (error) {
-    console.error('[Auto Skip Video] Erro ao inicializar:', error);
-  }
 }

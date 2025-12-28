@@ -1,101 +1,76 @@
 /**
- * Video Observer - Monitora e configura vídeos na página
+ * Video Handler - Configuração de vídeo REATIVA
+ * SEM MutationObserver, SEM polling - apenas eventos nativos
  */
 
-function inicializarObservadorVideo(endHandler) {
-  limparRecursos();
-
-  if (!document.body) {
-    const bodyObserver = new MutationObserver(() => {
-      if (document.body) {
-        bodyObserver.disconnect();
-        configurarObservadorVideo(endHandler);
-      }
-    });
-    bodyObserver.observe(document.documentElement, OBSERVER_OPTIONS);
-    return;
+// Função para desativar loop agressivamente
+function desativarLoop(video) {
+  if (video.loop) {
+    video.loop = false;
   }
-
-  configurarObservadorVideo(endHandler);
+  if (video.hasAttribute('loop')) {
+    video.removeAttribute('loop');
+  }
 }
 
-function configurarObservadorVideo(endHandler) {
-  const encontrarVideo = () => {
-    const video = document.querySelector('video');
-    if (!video) {
-      return;
-    }
+function configurarVideo(video) {
+  if (!video || video === currentVideo) return;
 
-    // Se é o mesmo vídeo, não fazer nada (evitar reprocessamento desnecessário)
-    if (video === currentVideo) {
-      return;
-    }
+  limparVideo();
+  currentVideo = video;
 
-    removerListenerAnterior();
-    currentVideo = video;
-    currentEndHandler = endHandler;
-    // REMOVIDO: timeupdate handler - dispara muito frequentemente e causa lentidão
-    // Confiamos 100% no evento 'ended' nativo que é mais eficiente
+  // Desativar loop imediatamente
+  desativarLoop(video);
 
-    // Configurações específicas por plataforma ao encontrar vídeo
-    const plataforma = detectarPlataforma();
-    configurarVideoPorPlataforma(video, plataforma);
+  // Handler para quando vídeo termina
+  currentEndHandler = () => {
+    if (isProcessing || !autoSkipEnabled) return;
+    isProcessing = true;
 
-    // APENAS evento 'ended' - evento nativo, zero overhead quando vídeo está tocando
-    video.addEventListener('ended', endHandler);
+    // Desativar loop novamente antes de avançar
+    desativarLoop(video);
 
-    // Listener de 'play' para garantir loop desativado quando vídeo começa (apenas YouTube)
-    // Evento nativo - APENAS desativa loop básico, sem querySelectorAll pesado
-    if (plataforma === 'youtube') {
-      currentPlayListener = () => {
-        // Desativar loop APENAS no vídeo atual (sem queries pesadas)
-        if (video.loop) {
-          video.loop = false;
-          video.setAttribute('loop', 'false');
-        }
-      };
-      video.addEventListener('play', currentPlayListener, { once: false });
-    }
-
-    if (DEBUG) {
-      console.log('[Auto Skip Video] Vídeo encontrado e monitorado:', {
-        duration: video.duration,
-        currentTime: video.currentTime,
-        platform: plataforma,
-        loop: video.loop
-      });
-    }
+    setTimeout(() => {
+      avancarVideo();
+      setTimeout(() => { isProcessing = false; }, 500);
+    }, DELAY_MS);
   };
 
-  encontrarVideo();
+  video.addEventListener('ended', currentEndHandler);
 
-  // MutationObserver com throttling MUITO AGGRESSIVO para Firefox
-  let ultimaObservacao = 0;
-  const THROTTLE_OBSERVER_MS = 2000; // Máximo 1x a cada 2 segundos
-  let pendingCheck = false;
+  // Desativar loop em MÚLTIPLOS eventos nativos (YouTube reativa constantemente)
+  const desativarLoopHandler = () => desativarLoop(video);
 
-  const executarBusca = () => {
-    pendingCheck = false;
-    encontrarVideo();
-  };
+  video.addEventListener('play', desativarLoopHandler, { passive: true });
+  video.addEventListener('playing', desativarLoopHandler, { passive: true });
+  video.addEventListener('seeked', desativarLoopHandler, { passive: true });
+  video.addEventListener('loadeddata', desativarLoopHandler, { passive: true });
 
-  videoObserver = new MutationObserver(() => {
-    const agora = Date.now();
-    if (agora - ultimaObservacao < THROTTLE_OBSERVER_MS || pendingCheck) {
-      return; // Throttling muito agressivo
+  // timeupdate com throttle leve (a cada 2s no máximo)
+  let lastCheck = 0;
+  video.addEventListener('timeupdate', () => {
+    const now = Date.now();
+    if (now - lastCheck > 2000) {
+      lastCheck = now;
+      desativarLoop(video);
     }
-    ultimaObservacao = agora;
-    pendingCheck = true;
-
-    // Usar requestIdleCallback quando disponível (muito mais leve)
-    if (typeof requestIdleCallback !== 'undefined') {
-      requestIdleCallback(executarBusca, { timeout: 3000 });
-    } else {
-      setTimeout(executarBusca, 100);
-    }
-  });
-
-  // Observar apenas childList do body (sem subtree) - mínimo overhead
-  videoObserver.observe(document.body, { childList: true, subtree: false });
+  }, { passive: true });
 }
 
+function avancarVideo() {
+  const hostname = window.location.hostname;
+
+  if (hostname.includes('youtube.com')) {
+    // YouTube: simular tecla ArrowDown
+    document.dispatchEvent(new KeyboardEvent('keydown', {
+      key: 'ArrowDown',
+      code: 'ArrowDown',
+      keyCode: 40,
+      which: 40,
+      bubbles: true
+    }));
+  } else {
+    // Outras plataformas: scroll down
+    scrollParaBaixo();
+  }
+}

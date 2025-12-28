@@ -23,51 +23,40 @@ function configurarObservadorVideo(endHandler) {
   const encontrarVideo = () => {
     const video = document.querySelector('video');
     if (!video) {
-      if (DEBUG) console.log('[Auto Skip Video] Vídeo não encontrado ainda...');
       return;
     }
-    
+
+    // Se é o mesmo vídeo, não fazer nada (evitar reprocessamento desnecessário)
     if (video === currentVideo) {
-      // Mesmo vídeo, mas garantir que loop ainda está desativado (especialmente YouTube)
-      const plataforma = detectarPlataforma();
-      if (plataforma === 'youtube' && video.loop) {
-        video.loop = false;
-        video.setAttribute('loop', 'false');
-        desativarLoopYouTube();
-      }
       return;
     }
 
     removerListenerAnterior();
     currentVideo = video;
     currentEndHandler = endHandler;
-    currentTimeUpdateHandler = criarTimeUpdateHandler(video, endHandler);
-    
+    // REMOVIDO: timeupdate handler - dispara muito frequentemente e causa lentidão
+    // Confiamos 100% no evento 'ended' nativo que é mais eficiente
+
     // Configurações específicas por plataforma ao encontrar vídeo
     const plataforma = detectarPlataforma();
     configurarVideoPorPlataforma(video, plataforma);
-    
-    // Para YouTube, também desativar loop imediatamente após adicionar listeners
-    if (plataforma === 'youtube') {
-      // Usar setTimeout para garantir que acontece após configuração
-      setTimeout(() => {
-        desativarLoopYouTube();
-      }, 0);
-    }
-    
-    // Adicionar múltiplos listeners para garantir detecção
+
+    // APENAS evento 'ended' - evento nativo, zero overhead quando vídeo está tocando
     video.addEventListener('ended', endHandler);
-    video.addEventListener('timeupdate', currentTimeUpdateHandler);
-    
-    // Adicionar listener de 'play' para garantir loop desativado quando vídeo tocar
-    video.addEventListener('play', () => {
-      if (plataforma === 'youtube' && video.loop) {
-        video.loop = false;
-        video.setAttribute('loop', 'false');
-        desativarLoopYouTube();
-      }
-    }, { once: false });
-    
+
+    // Listener de 'play' para garantir loop desativado quando vídeo começa (apenas YouTube)
+    // Evento nativo - APENAS desativa loop básico, sem querySelectorAll pesado
+    if (plataforma === 'youtube') {
+      currentPlayListener = () => {
+        // Desativar loop APENAS no vídeo atual (sem queries pesadas)
+        if (video.loop) {
+          video.loop = false;
+          video.setAttribute('loop', 'false');
+        }
+      };
+      video.addEventListener('play', currentPlayListener, { once: false });
+    }
+
     if (DEBUG) {
       console.log('[Auto Skip Video] Vídeo encontrado e monitorado:', {
         duration: video.duration,
@@ -80,10 +69,33 @@ function configurarObservadorVideo(endHandler) {
 
   encontrarVideo();
 
-  videoObserver = new MutationObserver(() => {
+  // MutationObserver com throttling MUITO AGGRESSIVO para Firefox
+  let ultimaObservacao = 0;
+  const THROTTLE_OBSERVER_MS = 2000; // Máximo 1x a cada 2 segundos
+  let pendingCheck = false;
+
+  const executarBusca = () => {
+    pendingCheck = false;
     encontrarVideo();
+  };
+
+  videoObserver = new MutationObserver(() => {
+    const agora = Date.now();
+    if (agora - ultimaObservacao < THROTTLE_OBSERVER_MS || pendingCheck) {
+      return; // Throttling muito agressivo
+    }
+    ultimaObservacao = agora;
+    pendingCheck = true;
+
+    // Usar requestIdleCallback quando disponível (muito mais leve)
+    if (typeof requestIdleCallback !== 'undefined') {
+      requestIdleCallback(executarBusca, { timeout: 3000 });
+    } else {
+      setTimeout(executarBusca, 100);
+    }
   });
 
-  videoObserver.observe(document.body, OBSERVER_OPTIONS);
+  // Observar apenas childList do body (sem subtree) - mínimo overhead
+  videoObserver.observe(document.body, { childList: true, subtree: false });
 }
 

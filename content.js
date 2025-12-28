@@ -25,26 +25,55 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (autoSkipEnabled) {
       aguardarDOMPronto();
     } else {
+      // Limpar intervalo de URL também
+      if (urlObserverInterval) {
+        clearInterval(urlObserverInterval);
+        urlObserverInterval = null;
+      }
       limparRecursos();
     }
   }
 });
 
-// Observar mudanças de URL (SPA navigation)
+// Observar mudanças de URL (SPA navigation) - ULTRA Otimizado
+let urlObserverInterval = null;
+let navigationListener = null;
+
 function configurarObserverURL() {
+  // Limpar recursos anteriores
+  if (urlObserverInterval) {
+    clearInterval(urlObserverInterval);
+    urlObserverInterval = null;
+  }
+  if (navigationListener && window.navigation) {
+    window.navigation.removeEventListener('navigate', navigationListener);
+    navigationListener = null;
+  }
+
   let ultimaUrl = location.href;
-  
-  const urlObserver = new MutationObserver(() => {
-    const url = location.href;
-    if (url !== ultimaUrl) {
-      ultimaUrl = url;
-      if (autoSkipEnabled) {
-        setTimeout(inicializarAutoSkip, 100);
+
+  // Preferir Navigation API (zero polling, event-driven)
+  if (typeof window.navigation !== 'undefined') {
+    navigationListener = (event) => {
+      if (autoSkipEnabled && event.destination.url !== ultimaUrl) {
+        ultimaUrl = event.destination.url;
+        inicializarAutoSkip();
       }
-    }
-  });
-  
-  urlObserver.observe(document, { subtree: true, childList: true });
+    };
+    window.navigation.addEventListener('navigate', navigationListener);
+    if (DEBUG) console.log('[Auto Skip Video] Usando Navigation API (zero polling)');
+  } else {
+    // Fallback: Polling a cada 3 segundos (suficiente para SPAs)
+    urlObserverInterval = setInterval(() => {
+      const url = location.href;
+      if (url !== ultimaUrl) {
+        ultimaUrl = url;
+        if (autoSkipEnabled) {
+          inicializarAutoSkip();
+        }
+      }
+    }, 3000); // 3 segundos - mais leve
+  }
 }
 
 // Inicializar quando o script carregar
@@ -68,10 +97,10 @@ function inicializarAutoSkip() {
   try {
     const plataforma = detectarPlataforma();
     if (DEBUG) console.log('[Auto Skip Video] Plataforma detectada:', plataforma);
-    
+
     const endHandler = obterEndHandler(plataforma);
     inicializarObservadorVideo(endHandler);
-    
+
     if (DEBUG) console.log('[Auto Skip Video] Inicialização concluída');
   } catch (error) {
     console.error('[Auto Skip Video] Erro ao inicializar:', error);

@@ -45,7 +45,6 @@
         "js/core.js",
         "js/detector.js",
         "js/utils/loop-disabler.js",
-        "js/utils/timeupdate-handler.js",
         "js/adapters/browser-chrome.js",
         "js/adapters/browser-firefox.js",
         "js/handlers/handler-youtube.js",
@@ -55,7 +54,7 @@
         "js/video-observer.js",
         "content.js"
       ],
-      "run_at": "document_idle"
+      "run_at": "document_end"
     }
   ],
   "action": {
@@ -72,7 +71,7 @@
     "128": "icons/logo-128.png"
   },
   "background": {
-    "scripts": ["background.js"]
+    "service_worker": "background.js"
   },
   "browser_specific_settings": {
     "gecko": {
@@ -81,4 +80,3 @@
     }
   }
 }
-

@@ -7,7 +7,7 @@
 const DELAY_MS = 300;
 const OBSERVER_OPTIONS = { childList: true, subtree: true };
 const STORAGE_KEY = 'autoSkipEnabled';
-const DEBUG = true;
+const DEBUG = false;
 
 // Seletores comuns para botões "próximo"
 const GENERIC_NEXT_SELECTORS = [
@@ -46,11 +46,10 @@ let autoSkipEnabled = true;
 let videoObserver = null;
 let currentVideo = null;
 let currentEndHandler = null;
-let currentTimeUpdateHandler = null;
 let isAvancando = false;
 let ultimoVideoId = null;
-let loopDisableInterval = null;
 let loopObserver = null;
+let currentPlayListener = null; // Listener de 'play' para desativar loop quando vídeo começa
 
 // ==================== DETECÇÃO DE PLATAFORMA ====================
 function detectarPlataforma() {
@@ -120,8 +119,10 @@ function removerListenerAnterior() {
     if (currentEndHandler) {
       currentVideo.removeEventListener('ended', currentEndHandler);
     }
-    if (currentTimeUpdateHandler) {
-      currentVideo.removeEventListener('timeupdate', currentTimeUpdateHandler);
+    // REMOVIDO: timeupdate handler não é mais usado
+    if (currentPlayListener) {
+      currentVideo.removeEventListener('play', currentPlayListener);
+      currentPlayListener = null;
     }
   }
 }
@@ -134,11 +135,6 @@ function limparRecursos() {
     videoObserver = null;
   }
   
-  if (loopDisableInterval) {
-    clearInterval(loopDisableInterval);
-    loopDisableInterval = null;
-  }
-  
   if (loopObserver) {
     loopObserver.disconnect();
     loopObserver = null;
@@ -146,6 +142,5 @@ function limparRecursos() {
   
   currentVideo = null;
   currentEndHandler = null;
-  currentTimeUpdateHandler = null;
 }
 

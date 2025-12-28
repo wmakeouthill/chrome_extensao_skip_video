@@ -1,6 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Auto Skip Video - Pular Vídeos Automaticamente",
+  "short_name": "Auto Skip Video",
   "version": "1.0.0",
   "description": "Pula automaticamente para o próximo vídeo quando o atual termina em Shorts, Reels, TikTok e outras plataformas",
   "permissions": [
@@ -57,7 +58,13 @@
     "128": "icons/logo-128.png"
   },
   "background": {
-    "service_worker": "background.js"
+    "scripts": ["background.js"]
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "autoskipvideo@example.com",
+      "strict_min_version": "109.0"
+    }
   }
 }
 

@@ -61,7 +61,8 @@ function criarZip() {
     
     if (isWindows) {
       // Windows: usar PowerShell Compress-Archive
-      const comando = `powershell -Command "Compress-Archive -Path ${arquivosParaZipar} -DestinationPath ${nomeArquivo} -Force"`;
+      const arquivosArray = ARQUIVOS_INCLUIR.map(a => `'${a}'`).join(',');
+      const comando = `powershell -Command "$files = @(${arquivosArray}); Compress-Archive -Path $files -DestinationPath '${nomeArquivo}' -Force"`;
       execSync(comando, { stdio: 'inherit' });
     } else {
       // Linux/Mac: usar zip

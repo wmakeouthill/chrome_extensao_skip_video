@@ -4,6 +4,7 @@
   "short_name": "Auto Skip Video",
   "version": "1.0.0",
   "description": "Pula automaticamente para o próximo vídeo quando o atual termina em Shorts, Reels, TikTok e outras plataformas",
+  "author": "Auto Skip Video",
   "permissions": [
     "storage",
     "activeTab"

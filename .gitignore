@@ -27,3 +27,5 @@ auto-skip-video.zip
 *.txt
 
 docswesley/
+
+package-lock.json

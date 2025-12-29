@@ -70,6 +70,18 @@ jobs:
           fi
           ls -la "${{ steps.build-output.outputs.path }}" | head -10
 
+      - name: Create 404.html for SPA routing
+        run: |
+          BUILD_PATH="${{ steps.build-output.outputs.path }}"
+          if [ -f "$BUILD_PATH/index.html" ]; then
+            echo "Criando 404.html para suportar SPA routing..."
+            cp "$BUILD_PATH/index.html" "$BUILD_PATH/404.html"
+            echo "✓ 404.html criado com sucesso"
+          else
+            echo "✗ index.html não encontrado em $BUILD_PATH"
+            exit 1
+          fi
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
 

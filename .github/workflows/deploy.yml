@@ -53,13 +53,30 @@ jobs:
         working-directory: ./website
         run: npm run build:gh
 
+      - name: Verify build output
+        id: build-output
+        run: |
+          echo "Verificando estrutura do build..."
+          if [ -f "website/dist/browser/browser/index.html" ]; then
+            echo "✓ index.html encontrado em dist/browser/browser/"
+            echo "path=./website/dist/browser/browser" >> $GITHUB_OUTPUT
+          elif [ -f "website/dist/browser/index.html" ]; then
+            echo "✓ index.html encontrado em dist/browser/"
+            echo "path=./website/dist/browser" >> $GITHUB_OUTPUT
+          else
+            echo "✗ index.html não encontrado!"
+            find website/dist -name "index.html" || true
+            exit 1
+          fi
+          ls -la "${{ steps.build-output.outputs.path }}" | head -10
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './website/dist/browser'
+          path: ${{ steps.build-output.outputs.path }}
 
   deploy:
     environment:

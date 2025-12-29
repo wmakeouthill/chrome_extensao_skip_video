@@ -1,0 +1,76 @@
+<section class="hero">
+  <div class="hero-content">
+    <h1 class="hero-title">Auto Skip Video</h1>
+    <p class="hero-subtitle">Pula automaticamente para o próximo vídeo quando o atual termina</p>
+    <p class="hero-description">
+      Extensão do Chrome que automatiza a navegação entre vídeos curtos, 
+      proporcionando uma experiência contínua e fluida em múltiplas plataformas.
+    </p>
+    <div class="hero-actions">
+      <a href="https://chrome.google.com/webstore" class="btn btn-primary" target="_blank" rel="noopener">
+        Instalar no Chrome
+      </a>
+      <a routerLink="/sobre" class="btn btn-secondary">
+        Saiba Mais
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="features">
+  <h2 class="section-title">Funcionalidades Principais</h2>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">⚡</div>
+      <h3>Liga/Desliga Simples</h3>
+      <p>Controle total via popup elegante. Ative ou desative com um clique.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🚀</div>
+      <h3>Ativação Automática</h3>
+      <p>Funciona automaticamente quando ativado, sem necessidade de interação constante.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🌐</div>
+      <h3>Múltiplas Plataformas</h3>
+      <p>Suporta 13+ plataformas diferentes de vídeos curtos.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🧠</div>
+      <h3>Detecção Inteligente</h3>
+      <p>Identifica automaticamente a plataforma e aplica o método apropriado.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔄</div>
+      <h3>Prevenção de Loops</h3>
+      <p>Desativa loops automáticos garantindo avanço correto.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">💾</div>
+      <h3>Estado Persistente</h3>
+      <p>Mantém suas preferências entre sessões.</p>
+    </div>
+  </div>
+</section>
+
+  <section class="platforms">
+    <h2 class="section-title">Plataformas Suportadas</h2>
+    <div class="platforms-grid">
+      @for (plataforma of plataformas(); track plataforma) {
+        <div class="platform-badge">{{ plataforma }}</div>
+      }
+    </div>
+  </section>
+
+<section class="privacy-highlight">
+  <div class="privacy-content">
+    <h2 class="section-title">🔒 Privacidade e Segurança</h2>
+    <p class="privacy-text">
+      Sua privacidade é nossa prioridade. A extensão <strong>NÃO coleta dados pessoais</strong>, 
+      <strong>NÃO transmite informações</strong> para servidores externos e funciona 
+      <strong>totalmente offline</strong>. O código é aberto e auditável.
+    </p>
+    <a routerLink="/privacidade" class="btn btn-outline">Leia nossa Política de Privacidade</a>
+  </div>
+</section>
+

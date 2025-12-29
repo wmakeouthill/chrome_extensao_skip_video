@@ -1,0 +1,151 @@
+<article class="about-content">
+  <header class="page-header">
+    <h1>Sobre a Extensão</h1>
+    <p class="page-subtitle">
+      Entenda como funciona o Auto Skip Video e como ele pode melhorar sua experiência
+      de navegação em vídeos curtos.
+    </p>
+  </header>
+
+  <section class="content-section">
+    <h2>O que é o Auto Skip Video?</h2>
+    <p>
+      O Auto Skip Video é uma extensão do Chrome que automatiza a navegação entre vídeos curtos,
+      pulando automaticamente para o próximo quando o vídeo atual termina. Ideal para quem consome
+      muito conteúdo em formato de Shorts, Reels e vídeos curtos, proporcionando uma experiência
+      de navegação contínua e fluida.
+    </p>
+    <p>
+      A extensão foi desenvolvida pensando em usuários que querem navegar por múltiplos vídeos
+      sem precisar interagir manualmente a cada término, economizando tempo e tornando a experiência
+      mais agradável.
+    </p>
+  </section>
+
+  <section class="content-section">
+    <h2>Como Funciona?</h2>
+    <p>
+      A extensão utiliza <strong>Manifest V3</strong> e é composta por três componentes principais:
+    </p>
+
+    <div class="architecture-grid">
+      <div class="architecture-card">
+        <h3>1. Background Service Worker</h3>
+        <p>
+          Inicializa o estado padrão da extensão (ativado por padrão) e gerencia
+          as configurações globais.
+        </p>
+      </div>
+
+      <div class="architecture-card">
+        <h3>2. Content Script</h3>
+        <p>
+          Script principal que roda nas páginas das plataformas suportadas.
+          Detecta quando vídeos terminam e executa ações para avançar para o próximo vídeo.
+        </p>
+      </div>
+
+      <div class="architecture-card">
+        <h3>3. Popup Interface</h3>
+        <p>
+          Interface do usuário para ativar/desativar a extensão.
+          Sincroniza o estado com o content script de forma simples e intuitiva.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <h2>Fluxo de Funcionamento</h2>
+    <ol class="flow-list">
+      <li>
+        <strong>Extensão instalada</strong> → Background.js inicializa estado (ativado por padrão)
+      </li>
+      <li>
+        <strong>Usuário navega</strong> → Content.js é injetado na plataforma suportada
+      </li>
+      <li>
+        <strong>Content.js detecta plataforma</strong> → Seleciona handler apropriado
+      </li>
+      <li>
+        <strong>Content.js encontra elemento &lt;video&gt;</strong> → Configura listeners
+      </li>
+      <li>
+        <strong>Vídeo termina</strong> → Handler específico executa ação (ArrowDown, scroll, etc.)
+      </li>
+      <li>
+        <strong>Próximo vídeo carrega</strong> → Processo se repete automaticamente
+      </li>
+    </ol>
+  </section>
+
+  <section class="content-section">
+    <h2>Detecção de Fim de Vídeo</h2>
+    <p>
+      A extensão utiliza múltiplas estratégias para detectar quando um vídeo termina:
+    </p>
+    <ul class="feature-list">
+      <li>
+        <strong>Evento 'ended'</strong> - Evento nativo do elemento &lt;video&gt;
+      </li>
+      <li>
+        <strong>Monitoramento 'timeupdate'</strong> - Verifica quando vídeo está próximo do fim
+        (últimos 0.3s ou 99%)
+      </li>
+      <li>
+        <strong>Detecção de loop</strong> - Identifica quando vídeo volta ao início após terminar
+      </li>
+    </ul>
+  </section>
+
+  <section class="content-section">
+    <h2>Prevenção de Problemas</h2>
+    <p>
+      Para garantir uma experiência suave, a extensão implementa várias proteções:
+    </p>
+    <ul class="feature-list">
+      <li>
+        <strong>Flag `isAvancando`</strong> - Previne múltiplas execuções simultâneas
+      </li>
+      <li>
+        <strong>Rastreamento de ID do vídeo</strong> - Evita processar o mesmo vídeo múltiplas vezes
+      </li>
+      <li>
+        <strong>Desativação de loop</strong> - Garante que vídeos não fiquem em loop antes de avançar
+      </li>
+      <li>
+        <strong>Delay configurável</strong> - 300ms de delay para garantir que ações sejam processadas
+      </li>
+    </ul>
+  </section>
+
+  <section class="content-section">
+    <h2>Como Usar</h2>
+    <ol class="flow-list">
+      <li>Instale a extensão da Chrome Web Store</li>
+      <li>Clique no ícone da extensão na barra de ferramentas</li>
+      <li>Ative o toggle para ligar a funcionalidade</li>
+      <li>Navegue para qualquer plataforma suportada</li>
+      <li>Aproveite! A extensão automaticamente pulará para o próximo vídeo quando o atual terminar</li>
+    </ol>
+  </section>
+
+  <section class="content-section highlight-box">
+    <h2>Privacidade e Segurança</h2>
+    <p>
+      A extensão foi desenvolvida com privacidade em mente:
+    </p>
+    <ul class="feature-list">
+      <li>✅ <strong>NÃO coleta dados pessoais</strong></li>
+      <li>✅ <strong>NÃO transmite informações</strong> para servidores externos</li>
+      <li>✅ <strong>Funciona totalmente offline</strong></li>
+      <li>✅ <strong>Código aberto</strong> e auditável</li>
+      <li>✅ <strong>Armazena apenas</strong> sua preferência localmente (ativado/desativado)</li>
+    </ul>
+    <p>
+      Para mais informações, consulte nossa
+      <a routerLink="/privacidade" class="link">Política de Privacidade</a>.
+    </p>
+  </section>
+</article>
+

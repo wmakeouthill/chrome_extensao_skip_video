@@ -1,0 +1,32 @@
+<div class="app-container">
+  <header class="header">
+    <nav class="nav">
+      <div class="nav-brand">
+        <a routerLink="/" class="brand-link">
+          <h1>{{ title }}</h1>
+        </a>
+      </div>
+      <ul class="nav-menu">
+        <li>
+          <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Início</a>
+        </li>
+        <li>
+          <a routerLink="/sobre" routerLinkActive="active">Sobre</a>
+        </li>
+        <li>
+          <a routerLink="/privacidade" routerLinkActive="active">Política de Privacidade</a>
+        </li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="main-content">
+    <router-outlet />
+  </main>
+
+  <footer class="footer">
+    <p>&copy; 2025 Auto Skip Video. Todos os direitos reservados.</p>
+    <p>Extensão gratuita e de código aberto. Sua privacidade é nossa prioridade.</p>
+  </footer>
+</div>
+

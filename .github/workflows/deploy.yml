@@ -32,6 +32,7 @@ jobs:
 
       - name: Cache node modules
         uses: actions/cache@v4
+        id: cache
         with:
           path: website/node_modules
           key: ${{ runner.os }}-node-${{ hashFiles('website/package-lock.json') }}
@@ -40,7 +41,13 @@ jobs:
 
       - name: Install dependencies
         working-directory: ./website
-        run: npm ci
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            echo "package-lock.json não encontrado, usando npm install..."
+            npm install
+          fi
 
       - name: Build
         working-directory: ./website

@@ -81,6 +81,23 @@
   font-size: 0.9rem;
 }
 
+.footer-contact {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.footer-contact a {
+  color: #667eea;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.footer-contact a:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
 @media (max-width: 768px) {
   .nav {
     flex-direction: column;

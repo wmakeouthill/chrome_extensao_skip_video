@@ -22,19 +22,12 @@
             "outputPath": "dist/browser",
             "index": "src/index.html",
             "browser": "src/main.ts",
+            "tsConfig": "tsconfig.json",
             "polyfills": [],
             "assets": ["src/favicon.ico", "src/assets"],
             "styles": ["src/styles.css"],
             "scripts": [],
             "allowedCommonJsDependencies": [],
-            "optimization": true,
-            "sourceMap": false,
-            "extractCss": true,
-            "namedChunks": false,
-            "aot": true,
-            "extractLicenses": true,
-            "vendorChunk": false,
-            "buildOptimizer": true,
             "budgets": [
               {
                 "type": "initial",
@@ -50,23 +43,9 @@
           },
           "configurations": {
             "production": {
-              "budgets": [
-                {
-                  "type": "initial",
-                  "maximumWarning": "500kb",
-                  "maximumError": "1mb"
-                },
-                {
-                  "type": "anyComponentStyle",
-                  "maximumWarning": "2kb",
-                  "maximumError": "4kb"
-                }
-              ],
               "outputHashing": "all"
             },
             "development": {
-              "optimization": false,
-              "extractLicenses": false,
               "sourceMap": true
             }
           },
